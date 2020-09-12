@@ -7,11 +7,15 @@ const app=express();
 //public
 app.use(express.static('public'));
 
-// app.get('/',(req,res)=>{
-// res.json({
-//     ok:true
-// })
-// })
+
+//rutas
+
+app.use('/api/auth',require('./routes/auth'));
+
+//auth, log, newtoken
+//crud: eventos
+
+
 
 
 const port =process.env.PORT
