@@ -1,36 +1,84 @@
 const {response}=require('express');
+const bcrypt=require('bcryptjs');
 const Usuario = require('../models/Usuario');
+const { generarJWT } = require('../helpers/jwt');
 
-const loginUsuario=(req,res=response)=>{
+const loginUsuario=async(req,res=response)=>{
    
     const{email,password}=req.body;
-    res.status(200).json({
-        ok:'login',
-        email,
-        password
-    })
+    try{
+
+        const usuario=await Usuario.findOne({email});
+        if(!usuario){
+           return res.status(404).json({
+                ok:false,
+                msg:'Usuario o contraseña incorrectos'
+            })
+        }
+        const validPass=bcrypt.compareSync(password,usuario.password);
+        if(!validPass){
+            return res.status(404).json({
+                ok:false,
+                msg:'Contraseña incorrecta'
+            });
+        }
+
+        //JTW
+        const token=await generarJWT(usuario.id,usuario.name);
+
+        res.status(200).json({
+            ok:true,
+            uid:usuario.id,
+            name:usuario.name,
+            token
+        })
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({
+            ok:false,
+            msg:'Por favor intente nuevamente'
+        })
+    }
+ 
 }
 
 const crearUsuario=async(req,res=response)=>{
-    // const{name,email,password}=req.body;
+    const{email,password}=req.body;
 
     try{
-        const usuario=new Usuario(req.body);
+        let usuario=await Usuario.findOne({email});
+        if(usuario){
+            return res.status(400).json({
+                ok:false,
+                msg:'Un usuario existe con ese correo electronico'
+            });
+        }
+        usuario=new Usuario(req.body);
+        //bcrypt: 
+        const salt=bcrypt.genSaltSync();
+        usuario.password=bcrypt.hashSync(password,salt);
+        await usuario.save();
 
-        await usuario.save()
+        //JWT
+        const token=await generarJWT(usuario.id,usuario.name);
+
+        res.status(201).json({
+            ok:'new',
+            uid:usuario.id,
+            name:usuario.name,
+            token
+            
+        });
+
     }catch(err){
         res.status(500).json({
             ok:false,
             msg:'Por favor intente nuevamente'
         })
     }
-    
 
-    res.status(201).json({
-        ok:'new',
-        msg:'registro'
-        
-    });
+  
 }
 
 const revalidarToken=(req,res)=>{
