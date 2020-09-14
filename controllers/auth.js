@@ -81,9 +81,15 @@ const crearUsuario=async(req,res=response)=>{
   
 }
 
-const revalidarToken=(req,res)=>{
+const revalidarToken=async(req,res=response)=>{
+    const {uid,name}=req;
+
+    //nuevo JWT y retornarlo en esta petición
+    const token=await generarJWT(uid,name);
+
     res.json({
-        ok:'retoken'
+        ok:'retoken',
+        token
     })
 }
 
