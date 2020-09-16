@@ -83,7 +83,7 @@ const crearUsuario=async(req,res=response)=>{
 
 const revalidarToken=async(req,res=response)=>{
     const {uid,name}=req;
-
+    try{
     //nuevo JWT y retornarlo en esta petición
     const token=await generarJWT(uid,name);
 
@@ -91,6 +91,10 @@ const revalidarToken=async(req,res=response)=>{
         ok:'retoken',
         token
     })
+    }catch(error){
+        console.log(error);
+    }
+    
 }
 
 module.exports={
