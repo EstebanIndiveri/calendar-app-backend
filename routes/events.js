@@ -34,11 +34,20 @@ router.post(
 router.put(
     '/:id',
     [
-        validarCampos
+        check('title','El titulo es obligatorio').not().isEmpty(),
+        check('start','Fecha de inicio es obligatoria').custom( isDate ),
+        check('end','Fecha de inicio es obligatoria').custom( isDate ), 
     ],
     actualizarEvento);
 
 
-router.delete('/',eliminarEvento);
+router.delete(
+    '/:id',
+    [
+        check('title','El titulo es obligatorio').not().isEmpty(),
+        check('start','Fecha de inicio es obligatoria').custom( isDate ),
+        check('end','Fecha de inicio es obligatoria').custom( isDate ), 
+    ],
+    eliminarEvento);
 
 module.exports=router;
